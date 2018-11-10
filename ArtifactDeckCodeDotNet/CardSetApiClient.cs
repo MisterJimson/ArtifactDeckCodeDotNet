@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -8,7 +9,8 @@ namespace ArtifactDeckCodeDotNet
     public class CardSetApiClient
     {
         HttpClient _httpClient;
-        CardSetJsonLocation _jsonLocation;
+        Dictionary<string, CardSetJsonLocation> _jsonLocations = new Dictionary<string, CardSetJsonLocation>();
+        Dictionary<string, CardSetData> _cardSetData = new Dictionary<string, CardSetData>();
 
         public CardSetApiClient()
         {
@@ -24,17 +26,33 @@ namespace ArtifactDeckCodeDotNet
         {
             await GetJsonLocation(setId);
 
-            HttpResponseMessage getCardSetResult = await _httpClient.GetAsync(_jsonLocation.CdnRoot + _jsonLocation.Url);
-            CardSetData cardSetData = JsonConvert.DeserializeObject<CardSetData>(await getCardSetResult.Content.ReadAsStringAsync());
-            return cardSetData;
+            if (!_cardSetData.ContainsKey(setId))
+            {
+                HttpResponseMessage getCardSetResult = await _httpClient.GetAsync(_jsonLocations[setId].CdnRoot + _jsonLocations[setId].Url);
+                CardSetData cardSetData = JsonConvert.DeserializeObject<CardSetData>(await getCardSetResult.Content.ReadAsStringAsync());
+                _cardSetData.Add(setId, cardSetData);
+            }
+            
+            return _cardSetData[setId];
         }
 
         private async Task GetJsonLocation(string setId)
         {
-            if (_jsonLocation == null || _jsonLocation.ExpireTime < UnixTimeNow())
+            bool containsKey = _jsonLocations.ContainsKey(setId);
+            if (!containsKey || _jsonLocations[setId].ExpireTime < UnixTimeNow())
             {
                 HttpResponseMessage getJsonLocationResult = await _httpClient.GetAsync($"https://playartifact.com/cardset/{setId}/");
-                _jsonLocation = JsonConvert.DeserializeObject<CardSetJsonLocation>(await getJsonLocationResult.Content.ReadAsStringAsync());
+                CardSetJsonLocation jsonLocation = JsonConvert.DeserializeObject<CardSetJsonLocation>(await getJsonLocationResult.Content.ReadAsStringAsync());
+
+                if (containsKey)
+                {
+                    _jsonLocations.Remove(setId);
+
+                    if (_cardSetData.ContainsKey(setId))
+                        _cardSetData.Remove(setId);
+                }
+
+                _jsonLocations.Add(setId, jsonLocation);
             }
         }
 
