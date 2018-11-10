@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2050
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArtifactDeckCodeDotNet", "ArtifactDeckCodeDotNet\ArtifactDeckCodeDotNet.csproj", "{CF3BC8E8-D991-4031-9416-AB9EEC88ED4C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArtifactDeckCodeDotNet.Tests", "ArtifactDeckCodeDotNet.Tests\ArtifactDeckCodeDotNet.Tests.csproj", "{38F69D8F-6F54-4F6A-A0E3-266D7C43122B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CF3BC8E8-D991-4031-9416-AB9EEC88ED4C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF3BC8E8-D991-4031-9416-AB9EEC88ED4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF3BC8E8-D991-4031-9416-AB9EEC88ED4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF3BC8E8-D991-4031-9416-AB9EEC88ED4C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{38F69D8F-6F54-4F6A-A0E3-266D7C43122B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38F69D8F-6F54-4F6A-A0E3-266D7C43122B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38F69D8F-6F54-4F6A-A0E3-266D7C43122B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38F69D8F-6F54-4F6A-A0E3-266D7C43122B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B3DA3804-8553-4C1F-B44F-CD97E703EA94}
+	EndGlobalSection
+EndGlobal
