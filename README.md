@@ -7,4 +7,4 @@ A C# port of [ArtifactDeckCode](https://github.com/ValveSoftware/ArtifactDeckCod
 - [x] Decoder
 - [ ] Encoder
 - [ ] Nuget
-- [ ] Card Set API Client
+- [x] Card Set API Client
