@@ -1,4 +1,5 @@
 ﻿using Xunit;
+using System.Linq;
 
 namespace ArtifactDeckCodeDotNet.Tests
 {
@@ -13,6 +14,7 @@ namespace ArtifactDeckCodeDotNet.Tests
             // Verify
             Assert.Equal(5, deck.Heroes.Count);
             Assert.Equal(16, deck.Cards.Count);
+            Assert.Equal(51, (deck.Heroes.Count * 3) + deck.Cards.Sum(c => c.Count));
             Assert.Equal("Green/Black Example", deck.Name);
 
             Assert.Contains(deck.Heroes, x => x.Id == 10014); // Lycan
