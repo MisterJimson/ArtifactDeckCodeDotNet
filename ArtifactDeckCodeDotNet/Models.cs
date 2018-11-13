@@ -2,13 +2,19 @@
 
 namespace ArtifactDeckCodeDotNet
 {
-    public class Hero
+    public interface ICard
     {
-        public int Id { get; set; } 
+        int Id { get; set; }
+
+    }
+
+    public class Hero : ICard
+    {
+        public int Id { get; set; }
         public int Turn { get; set; }
     }
 
-    public class Card
+    public class Card : ICard
     {
         public int Id { get; set; }
         public int Count { get; set; }

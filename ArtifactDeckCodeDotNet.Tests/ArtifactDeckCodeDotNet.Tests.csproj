@@ -17,4 +17,10 @@
     <ProjectReference Include="..\ArtifactDeckCodeDotNet\ArtifactDeckCodeDotNet.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="GreenBlackExample.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

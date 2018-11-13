@@ -8,7 +8,7 @@ namespace ArtifactDeckCodeDotNet.Tests
         public void ParseDeckShouldCorrectlyParseDesk ()
         {
             // Act
-            Deck deck = ArtifactDeckDecoder.ParseDeck(TestDecks.GreenBlackExample);
+            Deck deck = ArtifactDeckDecoder.ParseDeck(TestDeckCodes.GreenBlackExample);
 
             // Verify
             Assert.Equal(5, deck.Heroes.Count);

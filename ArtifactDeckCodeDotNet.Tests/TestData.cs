@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Newtonsoft.Json;
+using System.IO;
 
 namespace ArtifactDeckCodeDotNet.Tests
 {
-    public static class TestDecks
-    {
-        public static string GreenBlackExample => "ADCJWkTZX05uwGDCRV4XQGy3QGLmqUBg4GQJgGLGgO7AaABR3JlZW4vQmxhY2sgRXhhbXBsZQ__";
-
-        /*
+    /*
         GreenBlackExample
 
         Heroes:
@@ -36,6 +31,15 @@ namespace ArtifactDeckCodeDotNet.Tests
         1 Red Mist Maul
         1 Leather Armor
         2 Traveler's Cloak
-        */
+    */
+
+    public static class TestDeckCodes
+    {
+        public static string GreenBlackExample => "ADCJWkTZX05uwGDCRV4XQGy3QGLmqUBg4GQJgGLGgO7AaABR3JlZW4vQmxhY2sgRXhhbXBsZQ__";
+    }
+
+    public static class TestDecks
+    {
+        public static Deck GreenBlackExample => JsonConvert.DeserializeObject<Deck>(File.ReadAllText("GreenBlackExample.json"));
     }
 }
