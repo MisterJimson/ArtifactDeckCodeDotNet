@@ -116,7 +116,7 @@ namespace ArtifactDeckCodeDotNet
 
         private static Deck ParseDeckInternal(string deckCode, byte[] deckBytes)
         {
-		    int currentByteIndex = 0;
+		    int currentByteIndex = 0; // 0 instead of 1, deckBytes starts at 1 in PHP
             int totalBytes = deckBytes.Length;
 
             //check version num
@@ -169,8 +169,8 @@ namespace ArtifactDeckCodeDotNet
 
             List<Card> cards = new List<Card>();
             prevCardBase = 0;
-            while (currentByteIndex <= totalCardBytes)
-		    {
+            while (currentByteIndex < totalCardBytes) // < instead of <=, deckBytes starts at 1 in PHP
+            {
 			    int cardCount = 0;
 			    int cardId = 0;
                 if (!ReadSerializedCard(deckBytes, ref currentByteIndex, totalBytes, ref prevCardBase, ref cardCount, ref cardId))
@@ -180,8 +180,8 @@ namespace ArtifactDeckCodeDotNet
             }
 
 		    string name = "";
-            if (currentByteIndex <= totalBytes)
-		    {
+            if (currentByteIndex < totalBytes) // < instead of <=, deckBytes starts at 1 in PHP
+            {
                 var bytes = deckBytes.Skip(deckBytes.Length - stringLength).ToArray();
                 name = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
             }
