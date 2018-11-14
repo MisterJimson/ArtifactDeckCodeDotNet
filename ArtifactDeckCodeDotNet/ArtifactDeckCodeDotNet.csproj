@@ -2,6 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Jason Rai</Authors>
+    <Company></Company>
+    <Product>ArtifactDeckCodeDotNet</Product>
+    <Description>A library for encoding/decoding Artifact Deck Codes and requesting card information from the Card Set API.</Description>
+    <PackageProjectUrl>https://github.com/MisterJimson/ArtifactDeckCodeDotNet</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/MisterJimson/ArtifactDeckCodeDotNet/blob/master/LICENSE</PackageLicenseUrl>
   </PropertyGroup>
 
   <ItemGroup>
