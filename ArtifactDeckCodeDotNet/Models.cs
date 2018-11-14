@@ -5,7 +5,6 @@ namespace ArtifactDeckCodeDotNet
     public interface ICard
     {
         int Id { get; set; }
-
     }
 
     public class Hero : ICard

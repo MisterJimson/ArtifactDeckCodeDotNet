@@ -35,7 +35,8 @@ namespace ArtifactDeckCodeDotNet.Tests
 
     public static class TestDeckCodes
     {
-        public static string GreenBlackExample => "ADCJWkTZX05uwGDCRV4XQGy3QGLmqUBg4GQJgGLGgO7AaABR3JlZW4vQmxhY2sgRXhhbXBsZQ__";
+        public const string GreenBlackExample = "ADCJWkTZX05uwGDCRV4XQGy3QGLmqUBg4GQJgGLGgO7AaABR3JlZW4vQmxhY2sgRXhhbXBsZQ__";
+        public const string BlueRedExample = "ADCJQUQI30zuwEYg2ABeF1Bu94BmWIBTEkLtAKlAZakAYmHh0JsdWUvUmVkIEV4YW1wbGU_";
     }
 
     public static class TestDecks
