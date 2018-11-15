@@ -29,13 +29,15 @@ Console.WriteLine(deckCode); // outputs URL safe deck code string
 ### CardSetApiClient
 The CardSetApiClient allows you to request details on all cards in Artifact by set id. Currently "00" and "01" are the only valid set ids.
 ```csharp
-CardSetApiClient client = new CardSetApiClient();
-CardSetData cardSetData = await client.GetCardSetAsync("00");
+using(var apiClient = new CardSetApiClient())
+{
+    CardSet cardSet = await client.GetCardSetAsync("00");
 
-Console.WriteLine(cardSetData.CardSet.Version); //outputs "1"
-Console.WriteLine(cardSetData.CardSet.SetInfo.Name.English); //outputs "Base Set"
-Console.WriteLine(string.Join(", ", cardSetData.CardSet.CardList
-  .Skip(15)
-  .Take(3)
-  .Select(x => x.CardName.English))); //outputs "Town Portal Scroll, Fahrvhan the Dreamer, Pack Leadership"
+    Console.WriteLine(cardSet.Version); //outputs "1"
+    Console.WriteLine(cardSet.SetInfo.Name.English); //outputs "Base Set"
+    Console.WriteLine(string.Join(", ", cardSet.CardList)
+      .Skip(15)
+      .Take(3)
+      .Select(x => x.CardName.English)); //outputs "Town Portal Scroll, Fahrvhan the Dreamer, Pack Leadership"
+}
 ```
