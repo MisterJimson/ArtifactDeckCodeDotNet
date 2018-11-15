@@ -26,7 +26,8 @@ namespace ArtifactDeckCodeDotNet
         [JsonProperty("card_set", Required = Required.Always)]
         public CardSet CardSet { get; set; }
 
-        /* Not part of API; used for internal data caching */
+        /* Not part of official API; used for internal data caching */
+        [JsonProperty("expire_time")]
         internal DateTimeOffset ExpireTimeUtc { get; set; }
     }
 
