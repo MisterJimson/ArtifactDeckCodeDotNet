@@ -5,20 +5,29 @@ namespace ArtifactDeckCodeDotNet
 {
     public class CardSetJsonLocation
     {
-        [JsonProperty("cdn_root")]
+        [JsonProperty("cdn_root", Required = Required.Always)]
         public Uri CdnRoot { get; set; }
 
-        [JsonProperty("url")]
-        public string Url { get; set; }
+        [JsonProperty("url", Required = Required.Always)]
+        public Uri Url { get; set; }
 
-        [JsonProperty("expire_time")]
+        [JsonProperty("expire_time", Required = Required.Always)]
         public long ExpireTime { get; set; }
+
+        public Uri GetFullUri()
+        {
+            Uri.TryCreate(CdnRoot, Url, out var result);
+            return result;
+        }
     }
 
     public class CardSetData
     {
-        [JsonProperty("card_set")]
+        [JsonProperty("card_set", Required = Required.Always)]
         public CardSet CardSet { get; set; }
+
+        /* Not part of API; used for internal data caching */
+        internal DateTimeOffset ExpireTimeUtc { get; set; }
     }
 
     public class CardSet

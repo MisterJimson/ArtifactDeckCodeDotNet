@@ -1,65 +1,130 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace ArtifactDeckCodeDotNet
 {
-    public class CardSetApiClient
+    public class CardSetApiClient : IDisposable
     {
         HttpClient _httpClient;
-        Dictionary<string, CardSetJsonLocation> _jsonLocations = new Dictionary<string, CardSetJsonLocation>();
-        Dictionary<string, CardSetData> _cardSetData = new Dictionary<string, CardSetData>();
+        Lazy<CardSetDataCache> _cache;
 
-        public CardSetApiClient()
+        internal static string DataCacheFile = Path.Combine(Path.GetTempPath(), "ArtifactSetDataCache.json");
+
+        public CardSetApiClient() : this(new HttpClient())
         {
-            _httpClient = new HttpClient();
         }
 
         public CardSetApiClient(HttpClient httpClient)
         {
-            _httpClient = httpClient;
+            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+            _cache = new Lazy<CardSetDataCache>(() => new CardSetDataCache(DataCacheFile));
         }
 
-        public async Task<CardSetData> GetCardSetAsync(string setId)
+        public async Task<CardSet> GetCardSetAsync(string setId, bool forceFetch = false)
         {
-            await GetJsonLocation(setId);
-
-            if (!_cardSetData.ContainsKey(setId))
+            CardSetDataCache dataCache = _cache.Value;
+            if (forceFetch ||
+                !dataCache.TryGetValue(setId, out var data) ||
+                data.ExpireTimeUtc < DateTimeOffset.Now)
             {
-                HttpResponseMessage getCardSetResult = await _httpClient.GetAsync(_jsonLocations[setId].CdnRoot + _jsonLocations[setId].Url);
-                CardSetData cardSetData = JsonConvert.DeserializeObject<CardSetData>(await getCardSetResult.Content.ReadAsStringAsync());
-                _cardSetData.Add(setId, cardSetData);
+                data = await FetchCardSetAsync(setId);
+                dataCache[setId] = data;
             }
-            
-            return _cardSetData[setId];
+
+            return data.CardSet;
         }
 
-        private async Task GetJsonLocation(string setId)
+        public void Dispose()
         {
-            bool containsKey = _jsonLocations.ContainsKey(setId);
-            if (!containsKey || _jsonLocations[setId].ExpireTime < UnixTimeNow())
+            if (_cache.IsValueCreated)
             {
-                HttpResponseMessage getJsonLocationResult = await _httpClient.GetAsync($"https://playartifact.com/cardset/{setId}/");
+                _cache.Value.Dispose();
+            }
+        }
+
+        private static string CardSetInfoUrl(string setId) => $"https://playartifact.com/cardset/{setId}/";
+
+        private async Task<CardSetData> FetchCardSetAsync(string setId)
+        {
+            try
+            {
+                HttpResponseMessage getJsonLocationResult = await _httpClient.GetAsync(CardSetInfoUrl(setId));
                 CardSetJsonLocation jsonLocation = JsonConvert.DeserializeObject<CardSetJsonLocation>(await getJsonLocationResult.Content.ReadAsStringAsync());
 
-                if (containsKey)
-                {
-                    _jsonLocations.Remove(setId);
+                HttpResponseMessage getCardSetResult = await _httpClient.GetAsync(jsonLocation.GetFullUri());
+                CardSetData cardSetData = JsonConvert.DeserializeObject<CardSetData>(await getCardSetResult.Content.ReadAsStringAsync());
 
-                    if (_cardSetData.ContainsKey(setId))
-                        _cardSetData.Remove(setId);
-                }
+                // Record set data expiration date
+                cardSetData.ExpireTimeUtc = DateTimeOffset.FromUnixTimeSeconds(jsonLocation.ExpireTime);
 
-                _jsonLocations.Add(setId, jsonLocation);
+                return cardSetData;
+            }
+            catch (Exception ex)
+            {
+                throw new CardSetApiClientException($"Failed to fetch data for set {setId}.", ex);
             }
         }
 
-        public long UnixTimeNow()
+        private class CardSetDataCache : IDisposable
         {
-            TimeSpan timeSpan = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0);
-            return (long)timeSpan.TotalSeconds;
+            private readonly string _cacheFilePath;
+            private readonly Dictionary<string, CardSetData> _data;
+
+            public ICollection<string> Keys { get; }
+            public ICollection<CardSetData> Values { get; }
+            public int Count { get; }
+            public bool IsReadOnly { get; }
+
+            public CardSetDataCache(string filePath)
+            {
+                _cacheFilePath = filePath;
+                _data = ReadDataFromDisk(filePath);
+            }
+
+            public CardSetData this[string setId]
+            {
+                get => _data[setId];
+                set => _data[setId] = value;
+            }
+
+            public bool TryGetValue(string key, out CardSetData value)
+                => _data.TryGetValue(key, out value);
+
+            public bool Remove(string key) => _data.Remove(key);
+
+            public void Clear() => _data.Clear();
+
+            public void Dispose()
+            {
+                WriteDataToDisk();
+            }
+
+            private void WriteDataToDisk()
+            {
+                try
+                {
+                    File.WriteAllText(_cacheFilePath, JsonConvert.SerializeObject(_data));
+                }
+                catch (IOException) { }
+            }
+
+            private static Dictionary<string, CardSetData> ReadDataFromDisk(string filePath)
+            {
+                try
+                {
+                    JsonSerializer serializer = new JsonSerializer();
+                    var fileContents = File.ReadAllText(filePath);
+                    return JsonConvert.DeserializeObject<Dictionary<string, CardSetData>>(fileContents);
+                }
+                catch
+                {
+                    return new Dictionary<string, CardSetData>();
+                }
+            }
         }
     }
 }
