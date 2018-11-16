@@ -32,7 +32,7 @@ namespace ArtifactDeckCodeDotNet
                 CardSetData cardSetData = JsonConvert.DeserializeObject<CardSetData>(await getCardSetResult.Content.ReadAsStringAsync());
                 _cardSetData.Add(setId, cardSetData);
             }
-            
+
             return _cardSetData[setId];
         }
 
