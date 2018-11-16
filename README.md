@@ -31,7 +31,7 @@ The CardSetApiClient allows you to request details on all cards in Artifact by s
 ```csharp
 using(var apiClient = new CardSetApiClient())
 {
-    CardSet cardSet = await client.GetCardSetAsync("00");
+    CardSet cardSet = await client.GetCardSetAsync(0);
 
     Console.WriteLine(cardSet.Version); //outputs "1"
     Console.WriteLine(cardSet.SetInfo.Name.English); //outputs "Base Set"
