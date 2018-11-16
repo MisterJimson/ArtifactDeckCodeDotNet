@@ -10,7 +10,7 @@ namespace ArtifactDeckCodeDotNet.Tests
         {
             using (CardSetApiClient client = new CardSetApiClient())
             {
-                CardSet result = await client.GetCardSetAsync("00");
+                CardSet result = await client.GetCardSetAsync(0);
 
                 Assert.Equal(1, result.Version);
                 Assert.Equal(0, result.SetInfo.SetId);
@@ -24,7 +24,7 @@ namespace ArtifactDeckCodeDotNet.Tests
         {
             using (CardSetApiClient client = new CardSetApiClient())
             {
-                CardSet result = await client.GetCardSetAsync("01");
+                CardSet result = await client.GetCardSetAsync(1);
 
                 Assert.Equal(1, result.Version);
                 Assert.Equal(1, result.SetInfo.SetId);
@@ -38,7 +38,7 @@ namespace ArtifactDeckCodeDotNet.Tests
         {
             CardSetApiClient client = new CardSetApiClient();
 
-            await Assert.ThrowsAsync<CardSetApiClientException>(() => client.GetCardSetAsync("02"));
+            await Assert.ThrowsAsync<CardSetApiClientException>(() => client.GetCardSetAsync(2));
         }
     }
 }
