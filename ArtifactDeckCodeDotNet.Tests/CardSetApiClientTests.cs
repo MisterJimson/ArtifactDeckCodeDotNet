@@ -1,11 +1,12 @@
-﻿using Xunit;
+﻿using System.Threading.Tasks;
+using Xunit;
 
 namespace ArtifactDeckCodeDotNet.Tests
 {
     public class CardSetApiClientTests
     {
         [Fact]
-        public async void GetCardSetAsyncShouldReturnDataForSet00()
+        public async Task GetCardSetAsyncShouldReturnDataForSet00()
         {
             using (CardSetApiClient client = new CardSetApiClient())
             {
@@ -19,7 +20,7 @@ namespace ArtifactDeckCodeDotNet.Tests
         }
 
         [Fact]
-        public async void GetCardSetAsyncShouldReturnDataForSet01()
+        public async Task GetCardSetAsyncShouldReturnDataForSet01()
         {
             using (CardSetApiClient client = new CardSetApiClient())
             {
@@ -33,7 +34,7 @@ namespace ArtifactDeckCodeDotNet.Tests
         }
 
         [Fact]
-        public async void GetCardSetAsyncShouldThrowForInvalidSet()
+        public async Task GetCardSetAsyncShouldThrowForInvalidSet()
         {
             CardSetApiClient client = new CardSetApiClient();
 

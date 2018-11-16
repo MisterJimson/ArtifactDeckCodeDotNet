@@ -12,7 +12,7 @@ namespace ArtifactDeckCodeDotNet
         HttpClient _httpClient;
         Lazy<CardSetDataCache> _cache;
 
-        internal static string DataCacheFile = Path.Combine(Path.GetTempPath(), "ArtifactSetDataCache.json");
+        private static string DataCacheFile = Path.Combine(Path.GetTempPath(), "ArtifactSetDataCache.json");
 
         public CardSetApiClient() : this(new HttpClient())
         {
@@ -29,9 +29,9 @@ namespace ArtifactDeckCodeDotNet
             CardSetDataCache dataCache = _cache.Value;
             if (forceFetch ||
                 !dataCache.TryGetValue(setId, out var data) ||
-                data.ExpireTimeUtc < DateTimeOffset.Now)
+                data.ExpireTimeUtc < DateTimeOffset.UtcNow)
             {
-                data = await FetchCardSetAsync(setId);
+                data = await FetchCardSetData(setId);
                 dataCache[setId] = data;
             }
 
@@ -46,26 +46,42 @@ namespace ArtifactDeckCodeDotNet
             }
         }
 
-        private static string CardSetInfoUrl(string setId) => $"https://playartifact.com/cardset/{setId}/";
+        private static Uri CardSetInfoUrl(string setId) => new Uri($"https://playartifact.com/cardset/{setId}");
 
-        private async Task<CardSetData> FetchCardSetAsync(string setId)
+        private async Task<CardSetData> FetchCardSetData(string setId)
+        {
+            CardSetJsonLocation jsonLocation = await FetchCardSetLocation(CardSetInfoUrl(setId));
+            CardSetData cardSetData = await FetchCardSetData(jsonLocation.GetFullUri());
+
+            // Record set data expiration date
+            cardSetData.ExpireTimeUtc = DateTimeOffset.FromUnixTimeSeconds(jsonLocation.ExpireTime);
+
+            return cardSetData;
+        }
+
+        private async Task<CardSetData> FetchCardSetData(Uri cardSetDataUri)
         {
             try
             {
-                HttpResponseMessage getJsonLocationResult = await _httpClient.GetAsync(CardSetInfoUrl(setId));
-                CardSetJsonLocation jsonLocation = JsonConvert.DeserializeObject<CardSetJsonLocation>(await getJsonLocationResult.Content.ReadAsStringAsync());
-
-                HttpResponseMessage getCardSetResult = await _httpClient.GetAsync(jsonLocation.GetFullUri());
-                CardSetData cardSetData = JsonConvert.DeserializeObject<CardSetData>(await getCardSetResult.Content.ReadAsStringAsync());
-
-                // Record set data expiration date
-                cardSetData.ExpireTimeUtc = DateTimeOffset.FromUnixTimeSeconds(jsonLocation.ExpireTime);
-
-                return cardSetData;
+                HttpResponseMessage getCardSetResult = await _httpClient.GetAsync(cardSetDataUri);
+                return JsonConvert.DeserializeObject<CardSetData>(await getCardSetResult.Content.ReadAsStringAsync());
             }
             catch (Exception ex)
             {
-                throw new CardSetApiClientException($"Failed to fetch data for set {setId}.", ex);
+                throw new CardSetApiClientException($"Failed to fetch set data from {cardSetDataUri}", ex);
+            }
+        }
+
+        private async Task<CardSetJsonLocation> FetchCardSetLocation(Uri setInfoUri)
+        {
+            try
+            {
+                HttpResponseMessage getJsonLocationResult = await _httpClient.GetAsync(setInfoUri);
+                return JsonConvert.DeserializeObject<CardSetJsonLocation>(await getJsonLocationResult.Content.ReadAsStringAsync());
+            }
+            catch (Exception ex)
+            {
+                throw new CardSetApiClientException($"Failed to fetch set information from ${setInfoUri}", ex);
             }
         }
 
