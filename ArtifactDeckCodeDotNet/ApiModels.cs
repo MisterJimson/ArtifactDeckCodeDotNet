@@ -85,8 +85,8 @@ namespace ArtifactDeckCodeDotNet
         [JsonProperty("attack", NullValueHandling = NullValueHandling.Ignore)]
         public long? Attack { get; set; }
 
-        [JsonProperty("is_black", NullValueHandling = NullValueHandling.Ignore)]
-        public bool? IsBlack { get; set; }
+        [JsonProperty("is_black", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public bool IsBlack { get; set; }
 
         [JsonProperty("sub_type", NullValueHandling = NullValueHandling.Ignore)]
         public string SubType { get; set; }
@@ -94,17 +94,17 @@ namespace ArtifactDeckCodeDotNet
         [JsonProperty("gold_cost", NullValueHandling = NullValueHandling.Ignore)]
         public long? GoldCost { get; set; }
 
-        [JsonProperty("is_green", NullValueHandling = NullValueHandling.Ignore)]
-        public bool? IsGreen { get; set; }
+        [JsonProperty("is_green", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public bool IsGreen { get; set; }
 
-        [JsonProperty("is_red", NullValueHandling = NullValueHandling.Ignore)]
-        public bool? IsRed { get; set; }
+        [JsonProperty("is_red", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public bool IsRed { get; set; }
 
         [JsonProperty("armor", NullValueHandling = NullValueHandling.Ignore)]
         public long? Armor { get; set; }
 
-        [JsonProperty("is_blue", NullValueHandling = NullValueHandling.Ignore)]
-        public bool? IsBlue { get; set; }
+        [JsonProperty("is_blue", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public bool IsBlue { get; set; }
     }
 
     public class Name
