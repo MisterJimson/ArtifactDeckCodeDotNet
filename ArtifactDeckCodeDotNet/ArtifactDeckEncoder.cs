@@ -73,7 +73,7 @@ namespace ArtifactDeckCodeDotNet
             int prevCardId = 0;
             for (int currHero = 0; currHero < countHeroes; currHero++)
             {
-                Hero card = (Hero)allCards[currHero];
+                HeroRef card = (HeroRef)allCards[currHero];
                 if (card.Turn == 0)
                     throw new Exception("A hero's turn cannot be 0");
 
@@ -89,7 +89,7 @@ namespace ArtifactDeckCodeDotNet
             for (int currCard = countHeroes; currCard < allCards.Count; currCard++)
             {
                 //see how many cards we can group together
-                Card card = (Card)allCards[currCard];
+                CardRef card = (CardRef)allCards[currCard];
                 if (card.Count == 0)
                     throw new Exception("A card's count cannot be 0");
                 if (card.Id <= 0)

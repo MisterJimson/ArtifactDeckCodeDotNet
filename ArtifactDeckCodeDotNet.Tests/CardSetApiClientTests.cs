@@ -15,7 +15,7 @@ namespace ArtifactDeckCodeDotNet.Tests
                 Assert.Equal(1, result.Version);
                 Assert.Equal(0, result.SetInfo.SetId);
                 Assert.Equal("Base Set", result.SetInfo.Name.English);
-                Assert.True(result.CardList.Length > 0);
+                Assert.True(result.CardList.Count > 0);
             }
         }
 
@@ -29,7 +29,7 @@ namespace ArtifactDeckCodeDotNet.Tests
                 Assert.Equal(1, result.Version);
                 Assert.Equal(1, result.SetInfo.SetId);
                 Assert.Equal("Call to Arms", result.SetInfo.Name.English);
-                Assert.True(result.CardList.Length > 0);
+                Assert.True(result.CardList.Count > 0);
             }
         }
 

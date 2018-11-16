@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 
 namespace ArtifactDeckCodeDotNet
 {
@@ -40,10 +41,10 @@ namespace ArtifactDeckCodeDotNet
         public SetInfo SetInfo { get; set; }
 
         [JsonProperty("card_list")]
-        public CardList[] CardList { get; set; }
+        public List<Card> CardList { get; set; }
     }
 
-    public class CardList
+    public class Card
     {
         [JsonProperty("card_id")]
         public long CardId { get; set; }

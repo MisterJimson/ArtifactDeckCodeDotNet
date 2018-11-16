@@ -151,7 +151,7 @@ namespace ArtifactDeckCodeDotNet
                 throw new Exception("Missing hero count");
 
             //now read in the heroes
-            List<Hero> heroes = new List<Hero>();
+            List<HeroRef> heroes = new List<HeroRef>();
             int prevCardBase = 0;
             {
                 for (int currHero = 0; currHero < numHeroes; currHero++)
@@ -163,11 +163,11 @@ namespace ArtifactDeckCodeDotNet
                         throw new Exception("Missing hero data");
                     }
 
-                    heroes.Add(new Hero { Id = heroCardId, Turn = heroTurn });
+                    heroes.Add(new HeroRef { Id = heroCardId, Turn = heroTurn });
                 }
             }
 
-            List<Card> cards = new List<Card>();
+            List<CardRef> cards = new List<CardRef>();
             prevCardBase = 0;
             while (currentByteIndex < totalCardBytes) // < instead of <=, deckBytes starts at 1 in PHP
             {
@@ -176,7 +176,7 @@ namespace ArtifactDeckCodeDotNet
                 if (!ReadSerializedCard(deckBytes, ref currentByteIndex, totalBytes, ref prevCardBase, ref cardCount, ref cardId))
                     throw new Exception("Missing card data");
 
-                cards.Add(new Card { Id = cardId, Count = cardCount });
+                cards.Add(new CardRef { Id = cardId, Count = cardCount });
             }
 
             string name = "";

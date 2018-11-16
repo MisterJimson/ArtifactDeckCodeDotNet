@@ -7,13 +7,13 @@ namespace ArtifactDeckCodeDotNet
         int Id { get; set; }
     }
 
-    public class Hero : ICard
+    public class HeroRef : ICard
     {
         public int Id { get; set; }
         public int Turn { get; set; }
     }
 
-    public class Card : ICard
+    public class CardRef : ICard
     {
         public int Id { get; set; }
         public int Count { get; set; }
@@ -22,7 +22,7 @@ namespace ArtifactDeckCodeDotNet
     public class Deck
     {
         public string Name { get; set; }
-        public List<Hero> Heroes { get; set; }
-        public List<Card> Cards { get; set; }
+        public List<HeroRef> Heroes { get; set; }
+        public List<CardRef> Cards { get; set; }
     }
 }
