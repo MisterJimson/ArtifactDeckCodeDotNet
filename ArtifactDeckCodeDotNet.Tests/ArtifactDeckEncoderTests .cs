@@ -5,7 +5,7 @@ namespace ArtifactDeckCodeDotNet.Tests
     public class ArtifactDeckEncoderTests
     {
         [Fact]
-        public void ParseDeckShouldCorrectlyParseDesk ()
+        public void ParseDeckShouldCorrectlyParseDesk()
         {
             // Act
             string deckCode = ArtifactDeckEncoder.EncodeDeck(TestDecks.GreenBlackExample);

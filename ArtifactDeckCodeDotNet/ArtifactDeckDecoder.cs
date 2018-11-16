@@ -8,7 +8,7 @@ namespace ArtifactDeckCodeDotNet
     public static class ArtifactDeckDecoder
     {
         public static int CurrentVersion = 2;
-	    private static string EncodedPrefix = "ADC";
+        private static string EncodedPrefix = "ADC";
 
         //returns Deck with Heroes, Cards, and Name
         public static Deck ParseDeck(string deckCode)
@@ -46,7 +46,7 @@ namespace ArtifactDeckCodeDotNet
         {
             int continueBit = (1 << numBits);
             int newBits = chunk & (continueBit - 1);
-		    outBits |= (newBits << currShift);
+            outBits |= (newBits << currShift);
 
             return (chunk & continueBit) != 0;
         }
@@ -57,21 +57,21 @@ namespace ArtifactDeckCodeDotNet
 
             int deltaShift = 0;
             if ((baseBits == 0) || ReadBitsChunk(baseValue, baseBits, deltaShift, ref outValue))
-		    {
-			    deltaShift += baseBits;
+            {
+                deltaShift += baseBits;
 
                 while (true)
                 {
                     //do we have more room?
                     if (indexStart > indexEnd)
-					    return false;
+                        return false;
 
-				    //read the bits from this next byte and see if we are done
-				    int nextByte = data[indexStart++];
+                    //read the bits from this next byte and see if we are done
+                    int nextByte = data[indexStart++];
                     if (!ReadBitsChunk(nextByte, 7, deltaShift, ref outValue))
                         break;
 
-				    deltaShift += 7;
+                    deltaShift += 7;
                 }
             }
 
@@ -83,40 +83,40 @@ namespace ArtifactDeckCodeDotNet
         {
             //end of the memory block?
             if (indexStart > indexEnd)
-			    return false;
+                return false;
 
             //header contains the count (2 bits), a continue flag, and 5 bits of offset data. If we have 11 for the count bits we have the count
             //encoded after the offset
             byte header = data[indexStart++];
             bool hasExtendedCount = ((header >> 6) == 0x03);
 
-		    //read in the delta, which has 5 bits in the header, then additional bytes while the value is set
-		    int cardDelta = 0;
+            //read in the delta, which has 5 bits in the header, then additional bytes while the value is set
+            int cardDelta = 0;
             if (!ReadVarEncodedUint32(header, 5, data, ref indexStart, indexEnd, ref cardDelta))
                 return false;
 
-		    outCardId = prevCardBase + cardDelta;
+            outCardId = prevCardBase + cardDelta;
 
             //now parse the count if we have an extended count
             if (hasExtendedCount)
-		    {
+            {
                 if (!ReadVarEncodedUint32(0, 0, data, ref indexStart, indexEnd, ref outCount))
                     return false;
             }
-		    else
-		    {
-			    //the count is just the upper two bits + 1 (since we don't encode zero)
-			    outCount = (header >> 6) + 1;
+            else
+            {
+                //the count is just the upper two bits + 1 (since we don't encode zero)
+                outCount = (header >> 6) + 1;
             }
 
-		    //update our previous card before we do the remap, since it was encoded without the remap
-		    prevCardBase = outCardId;
+            //update our previous card before we do the remap, since it was encoded without the remap
+            prevCardBase = outCardId;
             return true;
         }
 
         private static Deck ParseDeckInternal(string deckCode, byte[] deckBytes)
         {
-		    int currentByteIndex = 0; // 0 instead of 1, deckBytes starts at 1 in PHP
+            int currentByteIndex = 0; // 0 instead of 1, deckBytes starts at 1 in PHP
             int totalBytes = deckBytes.Length;
 
             //check version num
@@ -136,17 +136,17 @@ namespace ArtifactDeckCodeDotNet
 
             //grab the string size
             {
-			    int computedChecksum = 0;
-                for (int i = currentByteIndex; i < totalCardBytes; i++ )
-				    computedChecksum += deckBytes[i];
+                int computedChecksum = 0;
+                for (int i = currentByteIndex; i < totalCardBytes; i++)
+                    computedChecksum += deckBytes[i];
 
                 int masked = (computedChecksum & 0xFF);
                 if (checksum != masked)
                     throw new Exception("checksum does not match");
             }
 
-		    //read in our hero count (part of the bits are in the version, but we can overflow bits here
-		    int numHeroes = 0;
+            //read in our hero count (part of the bits are in the version, but we can overflow bits here
+            int numHeroes = 0;
             if (!ReadVarEncodedUint32(versionAndHeroes, 3, deckBytes, ref currentByteIndex, totalCardBytes, ref numHeroes))
                 throw new Exception("Missing hero count");
 
@@ -155,9 +155,9 @@ namespace ArtifactDeckCodeDotNet
             int prevCardBase = 0;
             {
                 for (int currHero = 0; currHero < numHeroes; currHero++)
-			    {
-				    int heroTurn = 0;
-				    int heroCardId = 0;
+                {
+                    int heroTurn = 0;
+                    int heroCardId = 0;
                     if (!ReadSerializedCard(deckBytes, ref currentByteIndex, totalCardBytes, ref prevCardBase, ref heroTurn, ref heroCardId))
                     {
                         throw new Exception("Missing hero data");
@@ -171,15 +171,15 @@ namespace ArtifactDeckCodeDotNet
             prevCardBase = 0;
             while (currentByteIndex < totalCardBytes) // < instead of <=, deckBytes starts at 1 in PHP
             {
-			    int cardCount = 0;
-			    int cardId = 0;
+                int cardCount = 0;
+                int cardId = 0;
                 if (!ReadSerializedCard(deckBytes, ref currentByteIndex, totalBytes, ref prevCardBase, ref cardCount, ref cardId))
                     throw new Exception("Missing card data");
 
                 cards.Add(new Card { Id = cardId, Count = cardCount });
             }
 
-		    string name = "";
+            string name = "";
             if (currentByteIndex < totalBytes) // < instead of <=, deckBytes starts at 1 in PHP
             {
                 var bytes = deckBytes.Skip(deckBytes.Length - stringLength).ToArray();
