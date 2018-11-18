@@ -1,6 +1,9 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Runtime.Serialization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace ArtifactDeckCodeDotNet
 {
@@ -44,6 +47,37 @@ namespace ArtifactDeckCodeDotNet
         public List<Card> CardList { get; set; }
     }
 
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum CardType
+    {
+        [EnumMember(Value = "Stronghold")]
+        Stronghold,
+
+        [EnumMember(Value = "Improvement")]
+        Improvement,
+
+        [EnumMember(Value = "Spell")]
+        Spell,
+
+        [EnumMember(Value = "Ability")]
+        Ability,
+
+        [EnumMember(Value = "Passive Ability")]
+        PassiveAbility,
+
+        [EnumMember(Value = "Hero")]
+        Hero,
+
+        [EnumMember(Value = "Creep")]
+        Creep,
+
+        [EnumMember(Value = "Item")]
+        Item,
+
+        [EnumMember(Value = "Pathing")]
+        Pathing,
+    }
+
     public class Card
     {
         [JsonProperty("card_id")]
@@ -53,13 +87,13 @@ namespace ArtifactDeckCodeDotNet
         public long BaseCardId { get; set; }
 
         [JsonProperty("card_type")]
-        public string CardType { get; set; }
+        public CardType CardType { get; set; }
 
         [JsonProperty("card_name")]
-        public Name CardName { get; set; }
+        public Text CardName { get; set; }
 
         [JsonProperty("card_text")]
-        public Name CardText { get; set; }
+        public Text CardText { get; set; }
 
         [JsonProperty("mini_image")]
         public Image MiniImage { get; set; }
@@ -70,28 +104,28 @@ namespace ArtifactDeckCodeDotNet
         [JsonProperty("ingame_image")]
         public Image IngameImage { get; set; }
 
-        [JsonProperty("hit_points", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty("hit_points", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public long? HitPoints { get; set; }
 
         [JsonProperty("references")]
         public Reference[] References { get; set; }
 
-        [JsonProperty("illustrator", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty("illustrator", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string Illustrator { get; set; }
 
-        [JsonProperty("mana_cost", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty("mana_cost", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public long? ManaCost { get; set; }
 
-        [JsonProperty("attack", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty("attack", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public long? Attack { get; set; }
 
         [JsonProperty("is_black", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public bool IsBlack { get; set; }
 
-        [JsonProperty("sub_type", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty("sub_type", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string SubType { get; set; }
 
-        [JsonProperty("gold_cost", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty("gold_cost", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public long? GoldCost { get; set; }
 
         [JsonProperty("is_green", DefaultValueHandling = DefaultValueHandling.Ignore)]
@@ -100,23 +134,181 @@ namespace ArtifactDeckCodeDotNet
         [JsonProperty("is_red", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public bool IsRed { get; set; }
 
-        [JsonProperty("armor", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty("armor", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public long? Armor { get; set; }
 
         [JsonProperty("is_blue", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public bool IsBlue { get; set; }
     }
 
-    public class Name
+    public class Text
     {
-        [JsonProperty("english", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty("english", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
+        [DefaultValue("")]
         public string English { get; set; }
+
+        [JsonProperty("german", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
+        [DefaultValue("")]
+        public string German { get; set; }
+
+        [JsonProperty("french", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
+        [DefaultValue("")]
+        public string French { get; set; }
+
+        [JsonProperty("italian", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
+        [DefaultValue("")]
+        public string Italian { get; set; }
+
+        [JsonProperty("koreana", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
+        [DefaultValue("")]
+        public string Korean { get; set; }
+
+        [JsonProperty("spanish", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
+        [DefaultValue("")]
+        public string Spanish { get; set; }
+
+        [JsonProperty("schinese", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
+        [DefaultValue("")]
+        public string ChineseSimplified { get; set; }
+
+        [JsonProperty("tchinese", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
+        [DefaultValue("")]
+        public string ChineseTraditional { get; set; }
+
+        [JsonProperty("russian", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
+        [DefaultValue("")]
+        public string Russian { get; set; }
+
+        [JsonProperty("thai", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
+        [DefaultValue("")]
+        public string Thai { get; set; }
+
+        [JsonProperty("japanese", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
+        [DefaultValue("")]
+        public string Japanese { get; set; }
+
+        [JsonProperty("portuguese", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
+        [DefaultValue("")]
+        public string Portuguese { get; set; }
+
+        [JsonProperty("polish", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
+        [DefaultValue("")]
+        public string Polish { get; set; }
+
+        [JsonProperty("danish", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
+        [DefaultValue("")]
+        public string Danish { get; set; }
+
+        [JsonProperty("dutch", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
+        [DefaultValue("")]
+        public string Dutch { get; set; }
+
+        [JsonProperty("finnish", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
+        [DefaultValue("")]
+        public string Finnish { get; set; }
+
+        [JsonProperty("norwegian", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
+        [DefaultValue("")]
+        public string Norwegian { get; set; }
+
+        [JsonProperty("swedish", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
+        [DefaultValue("")]
+        public string Swedish { get; set; }
+
+        [JsonProperty("hungarian", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
+        [DefaultValue("")]
+        public string Hungarian { get; set; }
+
+        [JsonProperty("czech", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
+        [DefaultValue("")]
+        public string Czech { get; set; }
+
+        [JsonProperty("romanian", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
+        [DefaultValue("")]
+        public string Romanian { get; set; }
+
+        [JsonProperty("turkish", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
+        [DefaultValue("")]
+        public string Turkish { get; set; }
+
+        [JsonProperty("brazilian", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
+        [DefaultValue("")]
+        public string Brazilian { get; set; }
+
+        [JsonProperty("bulgarian", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
+        [DefaultValue("")]
+        public string Bulgarian { get; set; }
+
+        [JsonProperty("greek", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
+        [DefaultValue("")]
+        public string Greek { get; set; }
+
+        [JsonProperty("ukrainian", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
+        [DefaultValue("")]
+        public string Ukrainian { get; set; }
+
+        [JsonProperty("latam", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
+        [DefaultValue("")]
+        public string LatinAmerican { get; set; }
+
+        [JsonProperty("vietnamese", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
+        [DefaultValue("")]
+        public string Vietnamese { get; set; }
     }
 
     public class Image
     {
-        [JsonProperty("default", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty("default", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public Uri Default { get; set; }
+
+        [JsonProperty("german", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public Uri German { get; set; }
+
+        [JsonProperty("french", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public Uri French { get; set; }
+
+        [JsonProperty("italian", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public Uri Italian { get; set; }
+
+        [JsonProperty("koreana", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public Uri Korean { get; set; }
+
+        [JsonProperty("spanish", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public Uri Spanish { get; set; }
+
+        [JsonProperty("schinese", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public Uri ChineseSimplified { get; set; }
+
+        [JsonProperty("tchinese", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public Uri ChineseTraditional { get; set; }
+
+        [JsonProperty("russian", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public Uri Russian { get; set; }
+
+        [JsonProperty("japanese", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public Uri Japanese { get; set; }
+
+        [JsonProperty("brazilian", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public Uri Brazilian { get; set; }
+
+        [JsonProperty("latam", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public Uri LatinAmerican { get; set; }
+    }
+
+    [JsonConverter(typeof(StringEnumConverter))]
+    public enum RefType
+    {
+        [EnumMember(Value = "includes")]
+        Includes,
+
+        [EnumMember(Value = "references")]
+        References,
+
+        [EnumMember(Value = "active_ability")]
+        ActiveAbility,
+
+        [EnumMember(Value = "passive_ability")]
+        PassiveAbility,
     }
 
     public class Reference
@@ -125,9 +317,9 @@ namespace ArtifactDeckCodeDotNet
         public long CardId { get; set; }
 
         [JsonProperty("ref_type")]
-        public string RefType { get; set; }
+        public RefType RefType { get; set; }
 
-        [JsonProperty("count", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty("count", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public long? Count { get; set; }
     }
 
@@ -140,6 +332,6 @@ namespace ArtifactDeckCodeDotNet
         public long PackItemDef { get; set; }
 
         [JsonProperty("name")]
-        public Name Name { get; set; }
+        public Text Name { get; set; }
     }
 }
