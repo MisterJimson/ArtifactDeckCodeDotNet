@@ -1,5 +1,6 @@
-﻿using Xunit;
+﻿using System;
 using System.Linq;
+using Xunit;
 
 namespace ArtifactDeckCodeDotNet.Tests
 {
@@ -9,7 +10,7 @@ namespace ArtifactDeckCodeDotNet.Tests
         public void ParseGreenBlackExampleDeckShouldCorrectlyParseDeck()
         {
             // Act
-            Deck deck = ArtifactDeckDecoder.ParseDeck(TestDeckCodes.GreenBlackExample);
+            Deck deck = ArtifactDeckDecoder.DecodeDeck(TestDeckCodes.GreenBlackExample);
 
             // Verify
             Assert.Equal(5, deck.Heroes.Count);
@@ -31,7 +32,7 @@ namespace ArtifactDeckCodeDotNet.Tests
         public void ParseBlueRedExampleDeckShouldCorrectlyParseDeck()
         {
             // Act
-            Deck deck = ArtifactDeckDecoder.ParseDeck(TestDeckCodes.BlueRedExample);
+            Deck deck = ArtifactDeckDecoder.DecodeDeck(TestDeckCodes.BlueRedExample);
 
             // Verify
             Assert.Equal(5, deck.Heroes.Count);
@@ -47,6 +48,12 @@ namespace ArtifactDeckCodeDotNet.Tests
 
             Assert.Contains(deck.Cards, x => x.Id == 10191 && x.Count == 2); // Routed
             Assert.Contains(deck.Cards, x => x.Id == 10411 && x.Count == 3); // Cunning Plan
+        }
+
+        [Fact]
+        public void DecodeDeckThrowsWithNullInput()
+        {
+            Assert.Throws<ArgumentNullException>(() => ArtifactDeckDecoder.DecodeDeck(null));
         }
     }
 }

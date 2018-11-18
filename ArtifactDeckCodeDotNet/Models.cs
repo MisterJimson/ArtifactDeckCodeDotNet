@@ -4,25 +4,37 @@ namespace ArtifactDeckCodeDotNet
 {
     public interface ICard
     {
-        int Id { get; set; }
+        uint Id { get; set; }
     }
 
-    public class HeroRef : ICard
+    public struct HeroRef : ICard
     {
-        public int Id { get; set; }
-        public int Turn { get; set; }
+        public uint Id { get; set; }
+        public uint Turn { get; set; }
+
+        public HeroRef(uint id, uint turn)
+        {
+            Id = id;
+            Turn = turn;
+        }
     }
 
-    public class CardRef : ICard
+    public struct CardRef : ICard
     {
-        public int Id { get; set; }
-        public int Count { get; set; }
+        public uint Id { get; set; }
+        public uint Count { get; set; }
+
+        public CardRef(uint id, uint count)
+        {
+            Id = id;
+            Count = count;
+        }
     }
 
     public class Deck
     {
-        public string Name { get; set; }
-        public List<HeroRef> Heroes { get; set; }
-        public List<CardRef> Cards { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public List<HeroRef> Heroes { get; } = new List<HeroRef>();
+        public List<CardRef> Cards { get; } = new List<CardRef>();
     }
 }

@@ -5,220 +5,213 @@ using System.Text;
 
 namespace ArtifactDeckCodeDotNet
 {
+    using static Utils;
+
     public static class ArtifactDeckEncoder
     {
-        public static uint CurrentVersion = 2;
-        private static string EncodedPrefix = "ADC";
-        private static int MaxBytesForVarUint32 = 5;
-        private static int HeaderSize = 3;
-
-        //expects Deck with Heroes, Cards, and Name
-        //	signature cards for heroes SHOULD NOT be included in "cards"
-        public static string EncodeDeck(Deck deckContents)
+        /// <summary>
+        /// Encodes a <see cref="Deck"/> object into a string code.
+        /// Note that signature cards for heroes SHOULD NOT be included in the deck.
+        /// </summary>
+        public static string EncodeDeck(Deck deck)
         {
-            if (deckContents == null)
-                throw new ArgumentNullException(nameof(deckContents));
+            if (deck == null)
+                throw new ArgumentNullException(nameof(deck));
 
-            List<byte> bytes = EncodeBytes(deckContents);
+            var byteEncoder = new Encoder();
+            byte[] bytes = byteEncoder.EncodeToBytes(deck);
 
-            string deckCode = EncodeBytesToString(bytes);
-            return deckCode;
+            return EncodeDeckBytesToString(bytes);
         }
 
-        private static List<byte> EncodeBytes(Deck deckContents)
+        private static string EncodeDeckBytesToString(byte[] bytes)
         {
-            if (deckContents.Heroes == null || deckContents.Cards == null)
-                throw new ArgumentNullException();
+            string base64Encoding = Convert.ToBase64String(bytes);
+            string deckString = Constants.EncodedPrefix + base64Encoding;
 
-            deckContents.Heroes = deckContents.Heroes.OrderBy(x => x.Id).ToList();
-            deckContents.Cards = deckContents.Cards.OrderBy(x => x.Id).ToList();
+            return deckString.Replace('/', '-')
+                             .Replace('=', '_');
+        }
 
-            int countHeroes = deckContents.Heroes.Count;
-            List<ICard> allCards = deckContents.Heroes.Concat<ICard>(deckContents.Cards).ToList();
+        private class Encoder
+        {
+            private byte[] _deckNameUTF8;
+            private HeroRef[] _sortedHeroes;
+            private CardRef[] _sortedCards;
+            private List<byte> _bytes;
+            private int _checksumPosn;
+            private int _preStringByteCount;
 
-            List<byte> bytes = new List<byte>();
-            //our version and hero count
-            uint version = CurrentVersion << 4 | ExtractNBitsWithCarry(countHeroes, 3);
-            AddByte(bytes, version);
-
-            //the checksum which will be updated at the end
-            uint dummyChecksum = 0;
-            int checksumByte = bytes.Count;
-            AddByte(bytes, dummyChecksum);
-
-            // write the name size
-            uint nameLen = 0;
-            string name = "";
-            if (deckContents.Name != null)
+            public byte[] EncodeToBytes(Deck deck)
             {
-                // replace strip_tags() with your own HTML santizer or escaper.
-                //name = strip_tags( deckContents['name']);
-                name = deckContents.Name;
-                int trimLen = name.Length;
-                while (trimLen > 63)
+                if (deck == null)
+                    throw new ArgumentNullException(nameof(deck));
+
+                InitEncoderState(deck);
+
+                WriteVersionAndPartialHeroCount();
+                WriteChecksumPlaceholder();
+                WriteNameLength();
+                WriteRestOfHeroCount();
+                WriteHeroCards();
+                WriteCards();
+                WriteName();
+                UpdateChecksum();
+
+                return _bytes.ToArray();
+            }
+
+            private void InitEncoderState(Deck deck)
+            {
+                string sanitizedName = Sanitize(deck.Name ?? string.Empty);
+                string truncatedName = PrefixWithMaxBytes(sanitizedName, Constants.DeckNameMaxBytes, Encoding.UTF8);
+                _deckNameUTF8 = Encoding.UTF8.GetBytes(truncatedName);
+
+                _sortedHeroes = deck.Heroes.OrderBy(x => x.Id).ToArray();
+                _sortedCards = deck.Cards.OrderBy(x => x.Id).ToArray();
+
+                _bytes = new List<byte>();
+            }
+
+            private void WriteVersionAndPartialHeroCount()
+            {
+                uint heroCountLowBits = ExtractNBitsWithCarry((uint)_sortedHeroes.Length, 3);
+                uint value = Constants.CurrentVersion << 4 | heroCountLowBits;
+                AddByte(value);
+            }
+
+            private void WriteChecksumPlaceholder()
+            {
+                _checksumPosn = _bytes.Count;
+                AddByte(0);
+            }
+
+            private void WriteNameLength()
+            {
+                AddByte((uint)_deckNameUTF8.Length);
+            }
+
+            private void WriteRestOfHeroCount()
+            {
+                AddRemainingNumberToBuffer((uint)_sortedHeroes.Length, 3);
+            }
+
+            private void WriteHeroCards()
+            {
+                uint prevCardId = 0;
+                foreach (HeroRef card in _sortedHeroes)
                 {
-                    int amountToTrim = (int)Math.Floor((decimal)(trimLen - 63) / 4);
-                    amountToTrim = (amountToTrim > 1) ? amountToTrim : 1;
-                    name = name.Substring(0, name.Length - amountToTrim);
-                    trimLen = name.Length;
-                }
+                    if (card.Turn == 0)
+                        throw new ArtifactDeckEncoderException("Unable to encode hero card with a turn of 0.");
 
-                nameLen = (uint)name.Length;
-            }
-
-            AddByte(bytes, nameLen);
-
-            AddRemainingNumberToBuffer(countHeroes, 3, bytes);
-
-            int prevCardId = 0;
-            for (int currHero = 0; currHero < countHeroes; currHero++)
-            {
-                HeroRef card = (HeroRef)allCards[currHero];
-                if (card.Turn == 0)
-                    throw new Exception("A hero's turn cannot be 0");
-
-                AddCardToBuffer((uint)card.Turn, card.Id - prevCardId, bytes);
-
-                prevCardId = card.Id;
-            }
-
-            //reset our card offset
-            prevCardId = 0;
-
-            //now all of the cards
-            for (int currCard = countHeroes; currCard < allCards.Count; currCard++)
-            {
-                //see how many cards we can group together
-                CardRef card = (CardRef)allCards[currCard];
-                if (card.Count == 0)
-                    throw new Exception("A card's count cannot be 0");
-                if (card.Id <= 0)
-                    throw new Exception("A card's id cannot be 0 or less");
-
-                //record this set of cards, and advance
-                AddCardToBuffer((uint)card.Count, card.Id - prevCardId, bytes);
-
-                prevCardId = card.Id;
-            }
-
-            // save off the pre string bytes for the checksum
-            int preStringByteCount = bytes.Count;
-
-            //write the string
-            {
-                byte[] nameBytes = Encoding.UTF8.GetBytes(name);
-                foreach (byte nameByte in nameBytes)
-                {
-                    AddByte(bytes, nameByte);
+                    AddCardToBuffer(card.Turn, card.Id - prevCardId);
+                    prevCardId = card.Id;
                 }
             }
 
-            uint unFullChecksum = ComputeChecksum(bytes, preStringByteCount - HeaderSize);
-            uint unSmallChecksum = (unFullChecksum & 0x0FF);
-
-            bytes[checksumByte] = Convert.ToByte(unSmallChecksum);
-            return bytes;
-        }
-
-        private static string EncodeBytesToString(List<byte> bytes)
-        {
-            int byteCount = bytes.Count;
-            //if we have an empty buffer, just throw
-            if (byteCount == 0)
-                throw new Exception("No deck content");
-
-            string encoded = Convert.ToBase64String(bytes.ToArray());
-            string deckString = EncodedPrefix + encoded;
-
-            deckString = deckString.Replace('/', '-');
-            deckString = deckString.Replace('=', '_');
-
-            return deckString;
-        }
-
-        private static uint ExtractNBitsWithCarry(int value, int numBits)
-        {
-            uint limitBit = (uint)1 << numBits;
-            uint result = (uint)(value & (limitBit - 1));
-            if (value >= limitBit)
+            private void WriteCards()
             {
-                result |= limitBit;
+                uint prevCardId = 0;
+                foreach (CardRef card in _sortedCards)
+                {
+                    if (card.Id == 0)
+                        throw new ArtifactDeckEncoderException("Unable to encode card with an id of 0.");
+                    else if (card.Count == 0)
+                        throw new ArtifactDeckEncoderException("Unable to encode card with a count of 0.");
+
+                    AddCardToBuffer(card.Count, card.Id - prevCardId);
+                    prevCardId = card.Id;
+                }
             }
 
-            return result;
-        }
-
-        private static void AddByte(List<byte> bytes, uint b)
-        {
-            if (b > 255)
-                throw new Exception("Invalid byte value");
-
-            bytes.Add(Convert.ToByte(b));
-        }
-
-        //utility to write the rest of a number into a buffer. This will first strip the specified N bits off, and then write a series of bytes of the structure of 1 overflow bit and 7 data bits
-        private static void AddRemainingNumberToBuffer(int value, int alreadyWrittenBits, List<byte> bytes)
-        {
-            value >>= alreadyWrittenBits;
-            int numBytes = 0;
-            while (value > 0)
+            private void WriteName()
             {
-                uint nextByte = ExtractNBitsWithCarry(value, 7);
-                value >>= 7;
-                AddByte(bytes, nextByte);
+                // need to remember for later checksum calculation
+                _preStringByteCount = _bytes.Count;
 
-                numBytes++;
-            }
-        }
-
-        private static void AddCardToBuffer(uint count, int value, List<byte> bytes)
-        {
-            //this shouldn't ever be the case
-            if (count == 0)
-                throw new Exception($"{count} is 0, this shouldn't ever be the case");
-
-            int countBytesStart = bytes.Count;
-
-            //determine our count. We can only store 2 bits, and we know the value is at least one, so we can encode values 1-5. However, we set both bits to indicate an 
-            //extended count encoding
-            uint firstByteMaxCount = 0x03;
-            bool extendedCount = (count - 1) >= firstByteMaxCount;
-
-            //determine our first byte, which contains our count, a continue flag, and the first few bits of our value
-            uint firstByteCount = extendedCount ? firstByteMaxCount : /*( uint8 )*/(count - 1);
-            uint firstByte = (firstByteCount << 6);
-            firstByte |= ExtractNBitsWithCarry(value, 5);
-
-            AddByte(bytes, firstByte);
-
-            //now continue writing out the rest of the number with a carry flag
-            AddRemainingNumberToBuffer(value, 5, bytes);
-
-            //now if we overflowed on the count, encode the remaining count
-            if (extendedCount)
-            {
-                AddRemainingNumberToBuffer((int)count, 0, bytes);
+                foreach (byte nameByte in _deckNameUTF8)
+                {
+                    AddByte(nameByte);
+                }
             }
 
-            int countBytesEnd = bytes.Count;
-
-            if (countBytesEnd - countBytesStart > 11)
+            private void UpdateChecksum()
             {
-                //something went horribly wrong
-                throw new Exception($"{nameof(countBytesEnd)} - {nameof(countBytesStart)} is more than 11, something went horribly wrong");
-            }
-        }
-
-        private static uint ComputeChecksum(List<byte> bytes, int numBytes)
-        {
-            uint checksum = 0;
-            for (int addCheck = HeaderSize; addCheck < numBytes + HeaderSize; addCheck++)
-            {
-                byte b = bytes[addCheck];
-                checksum += b;
+                int dataLength = _preStringByteCount - Constants.HeaderSize;
+                _bytes[_checksumPosn] = ShortChecksum(_bytes, Constants.HeaderSize, dataLength);
             }
 
-            return checksum;
+            private void AddByte(uint b)
+            {
+                _bytes.Add(Convert.ToByte(b));
+            }
+
+            /// <summary>
+            /// Helper to write the rest of a number into a buffer.
+            /// This will first strip the specified N bits off, and then write a series of bytes
+            /// in the structure of 1 overflow bit and 7 data bits.
+            /// </summary>
+            private void AddRemainingNumberToBuffer(uint value, int alreadyWrittenBits)
+            {
+                value >>= alreadyWrittenBits;
+                int numBytes = 0;
+                while (value > 0)
+                {
+                    uint nextByte = ExtractNBitsWithCarry(value, 7);
+                    value >>= 7;
+                    AddByte(nextByte);
+
+                    numBytes++;
+                }
+            }
+
+            private void AddCardToBuffer(uint count, uint value)
+            {
+                if (count == 0)
+                    throw new InvalidOperationException($"The {nameof(count)} should never be zero.");
+
+                int countBytesStart = _bytes.Count;
+
+                // Determine our count.
+                // We can only store 2 bits, and we know the value is at least one,
+                // so we can encode values 1-5. However, we set both bits to indicate
+                // an extended count encoding.
+                uint firstByteMaxCount = 0x03;
+                bool extendedCount = (count - 1) >= firstByteMaxCount;
+
+                // Determine our first byte, which contains our count, a continue flag,
+                // and the first few bits of our value.
+                uint firstByteCount = extendedCount ? firstByteMaxCount : /*( uint8 )*/(count - 1);
+                uint firstByte = (firstByteCount << 6);
+                firstByte |= ExtractNBitsWithCarry(value, 5);
+
+                AddByte(firstByte);
+
+                // Now continue writing out the rest of the number with a carry flag.
+                AddRemainingNumberToBuffer(value, 5);
+
+                // Now if we overflowed on the count, encode the remaining count.
+                if (extendedCount)
+                {
+                    AddRemainingNumberToBuffer(count, 0);
+                }
+
+                // Sanity check
+                if (_bytes.Count - countBytesStart > 11)
+                    throw new InvalidOperationException("Too many bytes written for card.");
+            }
+
+            private static uint ExtractNBitsWithCarry(uint value, int numBits)
+            {
+                uint limitBit = 1u << numBits;
+                uint result = value & (limitBit - 1);
+                if (value >= limitBit)
+                {
+                    result |= limitBit;
+                }
+
+                return result;
+            }
         }
     }
 }
