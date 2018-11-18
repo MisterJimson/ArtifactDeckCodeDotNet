@@ -35,9 +35,9 @@ using(var apiClient = new CardSetApiClient())
 
     Console.WriteLine(cardSet.Version); //outputs "1"
     Console.WriteLine(cardSet.SetInfo.Name.English); //outputs "Base Set"
-    Console.WriteLine(string.Join(", ", cardSet.CardList)
+    Console.WriteLine(string.Join(", ", cardSet.CardList
       .Skip(15)
       .Take(3)
-      .Select(x => x.CardName.English)); //outputs "Town Portal Scroll, Fahrvhan the Dreamer, Pack Leadership"
+      .Select(x => x.CardName.English))); //outputs "Town Portal Scroll, Fahrvhan the Dreamer, Pack Leadership"
 }
 ```
