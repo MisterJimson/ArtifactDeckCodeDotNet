@@ -4,7 +4,7 @@ A C# port of [ArtifactDeckCode](https://github.com/ValveSoftware/ArtifactDeckCod
 Refer to that page for more detailed information on Artifact Deck Codes.
 ## Documentation
 ### Decoder
-ParseDeck returns a Deck object with contains a list of Heroes, Cards, and a Name;
+ParseDeck returns a Deck object with contains a list of Heroes(ids and turn numbers), Cards(ids and count), and the deck Name;
 ```csharp
 Deck deck = ArtifactDeckDecoder.ParseDeck("ADCJWkTZX05uwGDCRV4XQGy3QGLmqUBg4GQJgGLGgO7AaABR3JlZW4vQmxhY2sgRXhhbXBsZQ__");
 Console.WriteLine(deck.Name); // outputs "Green/Black Example"
