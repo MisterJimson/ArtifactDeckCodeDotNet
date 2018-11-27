@@ -4,7 +4,7 @@ A C# port of [ArtifactDeckCode](https://github.com/ValveSoftware/ArtifactDeckCod
 Refer to that page for more detailed information on Artifact Deck Codes.
 ## Documentation
 ### Decoder
-ParseDeck returns a Deck object with contains a list of Heroes(ids and turn numbers), Cards(ids and count), and the deck Name;
+ParseDeck returns a Deck object with contains a list of Heroes(ids and turn numbers), Cards(ids and count), and the deck Name.
 ```csharp
 Deck deck = ArtifactDeckDecoder.ParseDeck("ADCJWkTZX05uwGDCRV4XQGy3QGLmqUBg4GQJgGLGgO7AaABR3JlZW4vQmxhY2sgRXhhbXBsZQ__");
 Console.WriteLine(deck.Name); // outputs "Green/Black Example"
@@ -27,7 +27,7 @@ string deckCode = ArtifactDeckEncoder.EncodeDeck(deck);
 Console.WriteLine(deckCode); // outputs URL safe deck code string
 ```
 ### CardSetApiClient
-The CardSetApiClient allows you to request details on all cards in Artifact by set id. Currently "00" and "01" are the only valid set ids.
+The CardSetApiClient allows you to request details on all cards in Artifact by set id. Currently 0 and 1 are the only valid set ids.
 ```csharp
 using(var apiClient = new CardSetApiClient())
 {
