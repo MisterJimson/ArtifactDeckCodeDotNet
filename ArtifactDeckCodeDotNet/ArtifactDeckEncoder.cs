@@ -9,7 +9,6 @@ namespace ArtifactDeckCodeDotNet
     {
         public static uint CurrentVersion = 2;
         private static string EncodedPrefix = "ADC";
-        private static int MaxBytesForVarUint32 = 5;
         private static int HeaderSize = 3;
 
         //expects Deck with Heroes, Cards, and Name
