@@ -76,6 +76,9 @@ namespace ArtifactDeckCodeDotNet
 
         [EnumMember(Value = "Pathing")]
         Pathing,
+
+        [EnumMember(Value = "Mutation")]
+        Mutation
     }
 
     public class Card
